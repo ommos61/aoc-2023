@@ -2,11 +2,9 @@
 #define _DICT_H_
 //================================================
 
-typedef struct dict *dict;
-
-dict dictCreate(int size, int (*compare)(const void*, const void*));
-void *dictGet(dict d, void *element);
-void dictPut(dict d, void *element);
+struct dict *dictCreate(int size, int (*compare)(const void*, const void*));
+void *dictGet(struct dict *d, void *key);
+void dictPut(struct dict *d, void *key, void *value);
 #endif /* _DICT_H_ */
 
 // Dictionary implementation
@@ -21,8 +19,8 @@ struct dict {
     int (*compare)(const void*, const void*);
 };
 
-dict dictCreate(int size, int (*compare)(const void*, const void*)) {
-    dict result = malloc(sizeof(struct dict));
+struct dict *dictCreate(int size, int (*compare)(const void*, const void*)) {
+    struct dict *result = malloc(sizeof(struct dict));
     result->size = (size != 0) ? size : DICT_DEFAULT_CAP;
     result->items = malloc(result->size * sizeof(void *));
     result->compare = compare;
@@ -34,13 +32,13 @@ dict dictCreate(int size, int (*compare)(const void*, const void*)) {
     return result;
 }
 
-void *dictGet(dict d, void *element) {
+void *dictGet(struct dict *d, void *key) {
     // this returns a pointer to an existing element, the caller can modify
     // the contents of the element
     d->last_index = -1;
     d->last = NULL;
     for (int i = 0; i < d->new_index; i++) {
-        if (d->compare(d->items[i], element) == 0) {
+        if (d->compare(d->items[i], key) == 0) {
             d->last_index = i;
             d->last = d->items[i];
             break;
@@ -49,12 +47,13 @@ void *dictGet(dict d, void *element) {
     return d->last;
 }
 
-void dictPut(dict d, void *element) {
+void dictPut(struct dict *d, void *key, void *value) {
+    assert((key == value) && "Only support 'key' and 'values' pointing to same memory");
     // assumption is that if the element already exists, it is searched for
     // just before and last_index points to it, otherwise it is a new entry
     if (d->last_index == -1) {
         assert((d->new_index < d->size) && "dict overflow");
-        d->items[d->new_index] = element;
+        d->items[d->new_index] = key;
         d->new_index++;
     }
 }

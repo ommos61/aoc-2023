@@ -7,29 +7,36 @@
 #include <stdio.h>
 #include <limits.h>
 
-typedef struct state *state;
+// funtions to be implemented by user
+struct state *nextState(struct state *current, struct state *next);
+int stateCost(struct state *from, struct state *to);
+int stateCompare(const void *v1, const void *v2);
+int costCompare(const void *v1, const void *v2);
+void statePrint(const char *prefix, const void *v);
 
-state dijkstra(state start, state end, int (*isEndState)(state));
+// functions implemented in this file
+struct state *dijkstra(struct state *start, struct state *end, int (*isEndState)(struct state*));
+void stateFree(struct state *s);
 #endif /* _DIJKSTRA_H_ */
 
 #ifdef DIJKSTRA_IMPLEMENTATION
 extern int debug;
 
-state dijkstra(state start, state end, int (*isEndState)(state)) {
-    dict seen = dictCreate(0, stateCompare);
+struct state *dijkstra(struct state *start, struct state *end, int (*isEndState)(struct state*)) {
+    struct dict *seen = dictCreate(1000000, stateCompare);
     queue q = queueCreate(0, costCompare);
-    state startState = start;
-    state endState = end;
-    dictPut(seen, startState);
+    struct state *startState = start;
+    struct state *endState = end;
+    dictPut(seen, startState, startState);
     queuePush(q, startState);
 
     long states_handled = 0;
     while (queueLength(q) > 0) {
-        const state current = (const state)queuePop(q);
+        struct state *current = (struct state*)queuePop(q);
         if (debug) statePrint("Current state:", current);
         states_handled++;
-        //if (stateCompare(current, endState) == 0) {
         if (isEndState(current)) {
+            printf("END STATE REACHED!!!!!!!!!!!!!\n");
             if (current->cost < endState->cost) {
                 endState->cost = current->cost;
                 endState->prev = current->prev;
@@ -38,19 +45,25 @@ state dijkstra(state start, state end, int (*isEndState)(state)) {
             if (debug) printf("States still queued: %d\n", queueLength(q));
             break;
         } else {
-            state next = NULL;
+            struct state *next = NULL;
             while ((next = nextState(current, next)) != NULL) {
-                state next1 = dictGet(seen, next);
-                long next_cost = current->cost + 1;
                 if (debug) statePrint("Next state:", next);
-                if (next1 == NULL) {
+                struct state *seennext = dictGet(seen, next);
+                if (debug && (seennext != NULL)) statePrint("Seen Next state:", seennext);
+                int next_cost = current->cost + stateCost(current, next);
+                if (debug) printf("Next cost is %d\n", next_cost);
+                if (seennext == NULL) {
+                    if (debug) printf("state not seen yet\n");
                     next->cost = next_cost;
-                    dictPut(seen, next);
+                    next->prev = current;
+                    dictPut(seen, next, next);
                     queuePush(q, next);
                 } else {
-                    if (next_cost < next1->cost) {
-                        next1->cost = next_cost;
-                        next1->prev = current;
+                    if (debug) printf("state already seen with cost %d\n", seennext->cost);
+                    if (next_cost < seennext->cost) {
+                        printf("found lower cost for (%d, %d, %c)\n", next->posx, next->posy, dirchars[next->dir]);
+                        seennext->cost = next_cost;
+                        seennext->prev = current;
                         next->cost = next_cost;
                         next->prev = current;
                         queuePush(q, next);
@@ -64,7 +77,12 @@ state dijkstra(state start, state end, int (*isEndState)(state)) {
             //return endState;
         }
     }
+    printf("Queue lenght = %d\n", queueLength(q));
 
     return endState;
+}
+
+void stateFree(struct state *s) {
+    if (s != NULL) free(s);
 }
 #endif
