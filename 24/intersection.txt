@@ -1,0 +1,37 @@
+
+
+
+px1 + t1 * vx1 = px2 + t2 * vx2
+py1 + t1 * vy1 = py2 + t2 * vy2
+
+t1 = (px2 - px1 + t2 * vx2) / vx1
+t1 = (py2 - py1 + t2 * vy2) / vy1
+
+t1 = (px2 - px1 + t2 * vx2) / vx1 = (py2 - py1 + t2 * vy2) / vy1
+(px2 - px1 + t2 * vx2) / vx1 = (py2 - py1 + t2 * vy2) / vy1
+vy1 *(px2 - px1 + t2 * vx2) = vx1 * (py2 - py1 + t2 * vy2) / vy1
+vy1 * px2 - vy1 * px1 + t2 * vx2 * vy1 = vx1 * py2 - vx1 * py1 + t2 * vy2 * vx1
+t2 * (vx2 * vy1 - vy2 * vx1) = vx1 * py2 - vx1 * py1 - vy1 * px2 + vy1 * px1
+
+=================================================================
+xr = xa + t1*vax = xb + t2*vbx
+yr = ya + t1*vay = yb + t2*vby
+
+xa + t1*vax = xb + t2*vbx
+t1*vax = xb - xa + t2*vbx
+t1 = (xb - xa + t2*vbx) / vax
+
+ya + t1*vay = yb + t2*vby
+t2 * vby = ya -yb + t1*vay
+t2 = (ya - yb + t1*vay) / vby
+
+t1 = (xb - xa + t2*vbx) / vax
+t1 = (xb - xa + vbx * (ya - yb + t1*vay) / vby) / vax
+t1 = (xb - xa + (vbx * ya - vbx *yb + t1*vay*vbx) / vby) / vax
+vax * t1 = (xb - xa + (vbx * ya - vbx *yb + t1*vay*vbx) / vby)
+vby * vax * t1 = xb*vby - xa*vby + vbx * ya - vbx *yb + t1*vay*vbx
+vby*vax * t1 - vay * vbx * t1 = xb*vby - xa*vby + vbx*ya - vbx*yb
+(vby*vax - vay*vbx) * t1 = xb*vby - xa*vby + vbx*ya - vbx*yb
+
+
+
